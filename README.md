@@ -67,7 +67,7 @@ import (
 
 // ...
 
-db, err := sql.Open("mysql", "user:password@/dbname")
+db, err := sql.Open("singlestore", "user:password@/dbname")
 if err != nil {
 	panic(err)
 }

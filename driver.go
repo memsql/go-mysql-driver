@@ -8,10 +8,10 @@
 //
 // The driver should be used via the database/sql package:
 //
-//  import "database/sql"
-//  import _ "github.com/go-sql-driver/mysql"
+//	import "database/sql"
+//	import _ "github.com/go-sql-driver/mysql"
 //
-//  db, err := sql.Open("mysql", "user:password@/dbname")
+//	db, err := sql.Open("singlestore", "user:password@/dbname")
 //
 // See https://github.com/go-sql-driver/mysql#usage for details
 package mysql
@@ -81,7 +81,7 @@ func (d MySQLDriver) Open(dsn string) (driver.Conn, error) {
 }
 
 func init() {
-	sql.Register("mysql", &MySQLDriver{})
+	sql.Register("singlestore", &MySQLDriver{})
 }
 
 // NewConnector returns new driver.Connector.
