@@ -199,7 +199,7 @@ func parseByteYear(b []byte) (int, error) {
 			return 0, err
 		}
 		year += v * n
-		n = n / 10
+		n /= 10
 	}
 	return year, nil
 }
@@ -789,6 +789,12 @@ type noCopy struct{}
 
 // Lock is a no-op used by -copylocks checker from `go vet`.
 func (*noCopy) Lock() {}
+
+// Unlock is a no-op used by -copylocks checker from `go vet`.
+// noCopy should implement sync.Locker from Go 1.11
+// https://github.com/golang/go/commit/c2eba53e7f80df21d51285879d51ab81bcfbf6bc
+// https://github.com/golang/go/issues/26165
+func (*noCopy) Unlock() {}
 
 // atomicBool is a wrapper around uint32 for usage as a boolean value with
 // atomic access.
