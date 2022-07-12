@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"sync"
 
-        "github.com/openshift/gssapi"
+	"github.com/openshift/gssapi"
 )
 
 // server pub keys registry
