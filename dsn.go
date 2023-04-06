@@ -41,6 +41,7 @@ type Config struct {
 	DBName           string            // Database name
 	Params           map[string]string // Connection parameters
 	Collation        string            // Connection collation
+	ConnectAttrs     map[string]string // Connection attributes
 	Loc              *time.Location    // Location for time.Time values
 	MaxAllowedPacket int               // Max packet size allowed
 	ServerPubKey     string            // Server public key name
@@ -270,6 +271,30 @@ func (cfg *Config) FormatDSN() string {
 
 	if cfg.MaxAllowedPacket != defaultMaxAllowedPacket {
 		writeDSNParam(&buf, &hasParam, "maxAllowedPacket", strconv.Itoa(cfg.MaxAllowedPacket))
+	}
+
+	if len(cfg.ConnectAttrs) > 0 {
+		// connectAttrs=program_name:Login Server,other_name:other
+		if hasParam {
+			buf.WriteString("&connectAttrs=")
+		} else {
+			hasParam = true
+			buf.WriteString("?connectAttrs=")
+		}
+
+		var attr_names []string
+		for attr_name := range cfg.ConnectAttrs {
+			attr_names = append(attr_names, attr_name)
+		}
+		sort.Strings(attr_names)
+		for index, attr_name := range attr_names {
+			if index > 0 {
+				buf.WriteByte(',')
+			}
+			buf.WriteString(attr_name)
+			buf.WriteByte(':')
+			buf.WriteString(url.QueryEscape(cfg.ConnectAttrs[attr_name]))
+		}
 	}
 
 	// other params
@@ -536,6 +561,24 @@ func parseDSNParams(cfg *Config, params string) (err error) {
 			cfg.MaxAllowedPacket, err = strconv.Atoi(value)
 			if err != nil {
 				return
+			}
+		case "connectAttrs":
+			if cfg.ConnectAttrs == nil {
+				cfg.ConnectAttrs = make(map[string]string)
+			}
+
+			var ConnectAttrs string
+			if ConnectAttrs, err = url.QueryUnescape(value); err != nil {
+				return
+			}
+
+			// program_name:Name,foo:bar
+			for _, attr_str := range strings.Split(ConnectAttrs, ",") {
+				attr := strings.SplitN(attr_str, ":", 2)
+				if len(attr) != 2 {
+					continue
+				}
+				cfg.ConnectAttrs[attr[0]] = attr[1]
 			}
 		default:
 			// lazy init

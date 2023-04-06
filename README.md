@@ -242,6 +242,16 @@ SELECT u.id FROM users as u
 
 will return `u.id` instead of just `id` if `columnsWithAlias=true`.
 
+##### `connectAttrs`
+
+```
+Type:           map
+Valid Values:   comma-separated list of attribute:value pairs
+Default:        empty
+```
+
+Allows setting of connection attributes, for example `connectAttrs=program_name:YourProgramName` will show `YourProgramName` in `Program` field of connections list of Mysql Workbench, if your server supports it (requires `performance_schema` to be supported and enabled).
+
 ##### `interpolateParams`
 
 ```

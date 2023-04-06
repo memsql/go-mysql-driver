@@ -77,8 +77,11 @@ func init() {
 	dsn = fmt.Sprintf("%s:%s@%s/%s?timeout=30s", user, pass, netAddr, dbname)
 	c, err := net.Dial(prot, addr)
 	if err == nil {
+		fmt.Println("Will run driver tests")
 		available = true
 		c.Close()
+	} else {
+		fmt.Printf("Not running driver tests. %s is not connectable\n", addr)
 	}
 }
 
