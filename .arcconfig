@@ -1,0 +1,5 @@
+{
+  "project_id" : "go-singlestore-driver",
+  "conduit_uri" : "https:\/\/grizzly.internal.memcompute.com\/api\/"
+}
+

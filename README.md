@@ -242,6 +242,16 @@ SELECT u.id FROM users as u
 
 will return `u.id` instead of just `id` if `columnsWithAlias=true`.
 
+##### `connectAttrs`
+
+```
+Type:           map
+Valid Values:   comma-separated list of attribute:value pairs
+Default:        empty
+```
+
+Allows setting of connection attributes, for example `connectAttrs=program_name:YourProgramName,program_version:1.2.3`. They are sent in the [Protocol::HandshakeResponse41](https://dev.mysql.com/doc/dev/mysql-server/latest/page_protocol_connection_phase_packets_protocol_handshake_response.html) packet. Attributes and their values must not contain `:` and `,` symbols.
+
 ##### `interpolateParams`
 
 ```
