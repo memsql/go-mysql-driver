@@ -286,6 +286,7 @@ func (mc *mysqlConn) writeHandshakeResponsePacket(authResp []byte, plugin string
 		clientLocalFiles |
 		clientPluginAuth |
 		clientMultiResults |
+		clientConnectAttrs |
 		mc.flags&clientLongFlag
 
 	if mc.cfg.ClientFoundRows {
@@ -318,6 +319,13 @@ func (mc *mysqlConn) writeHandshakeResponsePacket(authResp []byte, plugin string
 		clientFlags |= clientConnectWithDB
 		pktLen += n + 1
 	}
+
+	// 1 byte to store length of all key-values
+	// NOTE: Actually, this is length encoded integer.
+	// But we support only len(connAttrBuf) < 251 for now because takeSmallBuffer
+	// doesn't support buffer size more than 4096 bytes.
+	// TODO(methane): Rewrite buffer management.
+	pktLen += 1 + len(mc.connector.encodedAttributes)
 
 	// Calculate packet length and get buffer with that size
 	data, err := mc.buf.takeSmallBuffer(pktLen + 4)
@@ -394,6 +402,11 @@ func (mc *mysqlConn) writeHandshakeResponsePacket(authResp []byte, plugin string
 	pos += copy(data[pos:], plugin)
 	data[pos] = 0x00
 	pos++
+
+	// Connection Attributes
+	data[pos] = byte(len(mc.connector.encodedAttributes))
+	pos++
+	pos += copy(data[pos:], []byte(mc.connector.encodedAttributes))
 
 	// Send Auth packet
 	return mc.writePacket(data[:pos])

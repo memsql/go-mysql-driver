@@ -34,34 +34,37 @@ var (
 // If a new Config is created instead of being parsed from a DSN string,
 // the NewConfig function should be used, which sets default values.
 type Config struct {
-	User             string            // Username
-	Passwd           string            // Password (requires User)
-	Net              string            // Network type
-	Addr             string            // Network address (requires Net)
-	DBName           string            // Database name
-	Params           map[string]string // Connection parameters
-	Collation        string            // Connection collation
-	Loc              *time.Location    // Location for time.Time values
-	MaxAllowedPacket int               // Max packet size allowed
-	ServerPubKey     string            // Server public key name
-	pubKey           *rsa.PublicKey    // Server public key
-	TLSConfig        string            // TLS configuration name
-	tls              *tls.Config       // TLS configuration
-	Timeout          time.Duration     // Dial timeout
-	ReadTimeout      time.Duration     // I/O read timeout
-	WriteTimeout     time.Duration     // I/O write timeout
+	User                 string            // Username
+	Passwd               string            // Password (requires User)
+	Net                  string            // Network type
+	Addr                 string            // Network address (requires Net)
+	DBName               string            // Database name
+	Params               map[string]string // Connection parameters
+	ConnectionAttributes string            // Connection Attributes, comma-delimited string of user-defined "key:value" pairs
+	Collation            string            // Connection collation
+	Loc                  *time.Location    // Location for time.Time values
+	MaxAllowedPacket     int               // Max packet size allowed
+	ServerPubKey         string            // Server public key name
+	pubKey               *rsa.PublicKey    // Server public key
+	TLSConfig            string            // TLS configuration name
+	TLS                  *tls.Config       // TLS configuration, its priority is higher than TLSConfig
+	Timeout              time.Duration     // Dial timeout
+	ReadTimeout          time.Duration     // I/O read timeout
+	WriteTimeout         time.Duration     // I/O write timeout
+	Logger               Logger            // Logger
 
-	AllowAllFiles           bool // Allow all files to be used with LOAD DATA LOCAL INFILE
-	AllowCleartextPasswords bool // Allows the cleartext client side plugin
-	AllowNativePasswords    bool // Allows the native password authentication method
-	AllowOldPasswords       bool // Allows the old insecure password method
-	CheckConnLiveness       bool // Check connections for liveness before using them
-	ClientFoundRows         bool // Return number of matching rows instead of rows changed
-	ColumnsWithAlias        bool // Prepend table alias to column names
-	InterpolateParams       bool // Interpolate placeholders into query string
-	MultiStatements         bool // Allow multiple statements in one query
-	ParseTime               bool // Parse time values to time.Time
-	RejectReadOnly          bool // Reject read-only connections
+	AllowAllFiles            bool // Allow all files to be used with LOAD DATA LOCAL INFILE
+	AllowCleartextPasswords  bool // Allows the cleartext client side plugin
+	AllowFallbackToPlaintext bool // Allows fallback to unencrypted connection if server does not support TLS
+	AllowNativePasswords     bool // Allows the native password authentication method
+	AllowOldPasswords        bool // Allows the old insecure password method
+	CheckConnLiveness        bool // Check connections for liveness before using them
+	ClientFoundRows          bool // Return number of matching rows instead of rows changed
+	ColumnsWithAlias         bool // Prepend table alias to column names
+	InterpolateParams        bool // Interpolate placeholders into query string
+	MultiStatements          bool // Allow multiple statements in one query
+	ParseTime                bool // Parse time values to time.Time
+	RejectReadOnly           bool // Reject read-only connections
 }
 
 // NewConfig creates a new Config and sets default values.
@@ -537,6 +540,11 @@ func parseDSNParams(cfg *Config, params string) (err error) {
 			if err != nil {
 				return
 			}
+
+		// Connection attributes
+		case "connectionAttributes":
+			cfg.ConnectionAttributes = value
+
 		default:
 			// lazy init
 			if cfg.Params == nil {
