@@ -1,4 +1,4 @@
-module github.com/go-sql-driver/mysql
+module github.com/memsql/go-singlestore-driver
 
 go 1.18
 

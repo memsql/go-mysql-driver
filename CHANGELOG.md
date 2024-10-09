@@ -1,3 +1,10 @@
+## Version 1.8.1-p1 (2024-10-09)
+
+Other changes:
+
+- Added support for auth_gssapi_client (kerberos) auth method
+
+
 ## Version 1.8.1 (2024-03-26)
 
 Bugfixes:
