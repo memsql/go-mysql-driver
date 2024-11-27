@@ -85,6 +85,7 @@ func (c *connector) Connect(ctx context.Context) (driver.Conn, error) {
 		connector:        c,
 	}
 	mc.parseTime = mc.cfg.ParseTime
+	mc.skipParseNumbers = mc.cfg.SkipParseNumbers
 
 	// Connect to Server
 	dialsLock.RLock()

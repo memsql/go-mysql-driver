@@ -349,6 +349,16 @@ Default:        false
 `parseTime=true` changes the output type of `DATE` and `DATETIME` values to `time.Time` instead of `[]byte` / `string`
 The date or datetime like `0000-00-00 00:00:00` is converted into zero value of `time.Time`.
 
+##### `skipParseNumbers`
+
+```
+Type:           bool
+Valid Values:   true, false
+Default:        false
+```
+
+`skipParseNumbers=true` tells the driver not to convert integers and floats to the native go data types, and pass their
+string representation as returned by the server to `database/sql`
 
 ##### `readTimeout`
 
