@@ -68,6 +68,7 @@ type Config struct {
 	InterpolateParams        bool // Interpolate placeholders into query string
 	MultiStatements          bool // Allow multiple statements in one query
 	ParseTime                bool // Parse time values to time.Time
+	SkipParseNumbers         bool // Don't parse integers and float/double values to native go types
 	RejectReadOnly           bool // Reject read-only connections
 
 	// unexported fields. new options should be come here
@@ -306,6 +307,10 @@ func (cfg *Config) FormatDSN() string {
 		writeDSNParam(&buf, &hasParam, "parseTime", "true")
 	}
 
+	if cfg.SkipParseNumbers {
+		writeDSNParam(&buf, &hasParam, "skipParseNumbers", "true")
+	}
+
 	if cfg.timeTruncate > 0 {
 		writeDSNParam(&buf, &hasParam, "timeTruncate", cfg.timeTruncate.String())
 	}
@@ -538,6 +543,14 @@ func parseDSNParams(cfg *Config, params string) (err error) {
 		case "multiStatements":
 			var isBool bool
 			cfg.MultiStatements, isBool = readBool(value)
+			if !isBool {
+				return errors.New("invalid bool value: " + value)
+			}
+
+		// skip integer and floating point numbers parsing
+		case "skipParseNumbers":
+			var isBool bool
+			cfg.SkipParseNumbers, isBool = readBool(value)
 			if !isBool {
 				return errors.New("invalid bool value: " + value)
 			}

@@ -429,6 +429,72 @@ func TestNumbersToAny(t *testing.T) {
 	})
 }
 
+// TestSkipParseNumbers tests selecting numeric columns with
+// skipParseNumbers=true and interpolateParams=true into sql.RawBytes
+func TestSkipParseNumbers(t *testing.T) {
+	if !available {
+		t.Skipf("MySQL server not running on %s", netAddr)
+	}
+
+	db, err := sql.Open(driverNameTest, dsn + "&skipParseNumbers=true&interpolateParams=true")
+	if err != nil {
+		t.Fatalf("error connecting: %s", err.Error())
+	}
+	defer db.Close()
+
+	cleanup := func() {
+		db.Exec("DROP TABLE IF EXISTS TestSkipParseNumbers")
+	}
+	dbt := &DBTest{t, db}
+	t.Cleanup(cleanup)
+
+	dbt.mustExec("CREATE TABLE TestSkipParseNumbers (id INT PRIMARY KEY, b BOOL, i8 TINYINT, " +
+	"i16 SMALLINT, i32 INT, i64 BIGINT, f32 FLOAT, f64 DOUBLE, iu32 INT UNSIGNED)")
+	dbt.mustExec("INSERT INTO TestSkipParseNumbers VALUES (1, true, 127, 32767, 2147483647, 9223372036854775807, 1.25, 2.5, 4294967295)")
+	
+	rows := dbt.mustQuery("SELECT b, i8, i16, i32, i64, f32, f64, iu32 FROM TestSkipParseNumbers WHERE id=?", 1)
+	if !rows.Next() {
+		dbt.Fatal("no data")
+	}
+	b := reflect.New(reflect.TypeOf(sql.RawBytes{})).Interface()
+	i8 := reflect.New(reflect.TypeOf(sql.RawBytes{})).Interface()
+	i16 := reflect.New(reflect.TypeOf(sql.RawBytes{})).Interface()
+	i32 := reflect.New(reflect.TypeOf(sql.RawBytes{})).Interface()
+	i64 := reflect.New(reflect.TypeOf(sql.RawBytes{})).Interface()
+	f32 := reflect.New(reflect.TypeOf(sql.RawBytes{})).Interface()
+	f64 := reflect.New(reflect.TypeOf(sql.RawBytes{})).Interface()
+	iu32 := reflect.New(reflect.TypeOf(sql.RawBytes{})).Interface()
+	err = rows.Scan(&b, &i8, &i16, &i32, &i64, &f32, &f64, &iu32)
+	if err != nil {
+		dbt.Fatal(err)
+	}
+	fmt.Printf("Type of  i64 is %s\n", reflect.TypeOf(i64))
+	if string(b.([]byte)) != "1" {
+		dbt.Errorf("b != 1")
+	}
+	if string(i8.([]byte)) != "127" {
+		dbt.Errorf("i8 != 127")
+	}
+	if string(i16.([]byte)) != "32767" {
+		dbt.Errorf("i16 != 32767")
+	}
+	if string(i32.([]byte)) != "2147483647" {
+		dbt.Errorf("i32 != 2147483647")
+	}
+	if string(i64.([]byte)) != "9223372036854775807" {
+		dbt.Errorf("i64 != 9223372036854775807")
+	}
+	if string(f32.([]byte)) != "1.25" {
+		dbt.Errorf("f32 != 1.25")
+	}
+	if string(f64.([]byte)) != "2.5" {
+		dbt.Errorf("f64 != 2.5")
+	}
+	if string(iu32.([]byte)) != "4294967295" {
+		dbt.Errorf("iu32 != 4294967295")
+	}
+}
+
 func TestMultiQuery(t *testing.T) {
 	runTestsWithMultiStatement(t, dsn, func(dbt *DBTest) {
 		// Create Table

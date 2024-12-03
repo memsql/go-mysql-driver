@@ -827,22 +827,38 @@ func (rows *textRows) readRow(dest []driver.Value) error {
 			}
 
 		case fieldTypeTiny, fieldTypeShort, fieldTypeInt24, fieldTypeYear, fieldTypeLong:
-			dest[i], err = strconv.ParseInt(string(buf), 10, 64)
+			if !mc.skipParseNumbers {
+				dest[i], err = strconv.ParseInt(string(buf), 10, 64)
+			} else {
+				dest[i] = buf
+			}
 
 		case fieldTypeLongLong:
-			if rows.rs.columns[i].flags&flagUnsigned != 0 {
-				dest[i], err = strconv.ParseUint(string(buf), 10, 64)
+			if !mc.skipParseNumbers {
+				if rows.rs.columns[i].flags&flagUnsigned != 0 {
+					dest[i], err = strconv.ParseUint(string(buf), 10, 64)
+				} else {
+					dest[i], err = strconv.ParseInt(string(buf), 10, 64)
+				}
 			} else {
-				dest[i], err = strconv.ParseInt(string(buf), 10, 64)
+				dest[i] = buf
 			}
 
 		case fieldTypeFloat:
-			var d float64
-			d, err = strconv.ParseFloat(string(buf), 32)
-			dest[i] = float32(d)
+			if !mc.skipParseNumbers {
+				var d float64
+				d, err = strconv.ParseFloat(string(buf), 32)
+				dest[i] = float32(d)
+			} else {
+				dest[i] = buf
+			}
 
 		case fieldTypeDouble:
-			dest[i], err = strconv.ParseFloat(string(buf), 64)
+			if !mc.skipParseNumbers {
+				dest[i], err = strconv.ParseFloat(string(buf), 64)
+			} else {
+				dest[i] = buf
+			}
 
 		default:
 			dest[i] = buf
