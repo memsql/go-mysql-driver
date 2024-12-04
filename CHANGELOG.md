@@ -1,3 +1,10 @@
+## Version 1.8.1-p2 (2024-12-04)
+
+Major changes:
+
+- Add skipParseNumbers DSN option to allow the driver not to parse numbers on text protocol
+
+
 ## Version 1.8.1-p1 (2024-10-09)
 
 Other changes:
