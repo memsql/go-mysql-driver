@@ -1,3 +1,10 @@
+## Version 1.8.1-p3 (2024-12-05)
+
+Other changes:
+
+- Removed support for auth_gssapi_client to simplify build when this plugin is not needed
+
+
 ## Version 1.8.1-p2 (2024-12-04)
 
 Major changes:
